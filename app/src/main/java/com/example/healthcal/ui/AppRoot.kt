@@ -9,25 +9,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.healthcal.data.local.AuthState
 import com.example.healthcal.ui.auth.AuthViewModel
 import com.example.healthcal.ui.auth.LoginScreen
 import com.example.healthcal.ui.home.HomeScreen
-import io.github.jan.supabase.auth.status.SessionStatus
-
 
 @Composable
 fun AppRoot(authViewModel: AuthViewModel = viewModel()) {
-    val status by authViewModel.sessionStatus.collectAsStateWithLifecycle()
+    val state by authViewModel.authState.collectAsStateWithLifecycle()
     val email by authViewModel.userEmail.collectAsStateWithLifecycle()
 
-    when (status) {
-        is SessionStatus.Authenticated -> HomeScreen(
-            email = email,
+    when (state) {
+        is AuthState.Authenticated -> HomeScreen(
+            email = email ?: (state as AuthState.Authenticated).email,
             onSignOut = authViewModel::signOut
         )
-        is SessionStatus.Initializing -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+        is AuthState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             CircularProgressIndicator()
         }
-        else -> LoginScreen(authViewModel)
+        is AuthState.NotAuthenticated -> LoginScreen(authViewModel)
     }
 }
