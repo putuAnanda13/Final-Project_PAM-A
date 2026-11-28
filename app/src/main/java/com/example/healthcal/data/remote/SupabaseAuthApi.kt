@@ -11,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 /**
  * Retrofit interface for the Supabase GoTrue (Auth) REST API.
@@ -23,7 +24,8 @@ interface SupabaseAuthApi {
     @POST("signup")
     suspend fun signUp(
         @Body body: SignUpRequest,
-        @Header("apikey") apiKey: String
+        @Header("apikey") apiKey: String,
+        @Query("redirect_to") redirectTo: String = "healthcal://login-callback"
     ): Response<AuthResponse>
 
     /** Sign in with email + password. */

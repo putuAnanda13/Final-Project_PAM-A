@@ -13,6 +13,7 @@ import com.example.healthcal.data.local.AuthState
 import com.example.healthcal.ui.auth.AuthViewModel
 import com.example.healthcal.ui.auth.LoginScreen
 import com.example.healthcal.ui.home.HomeScreen
+import com.example.healthcal.ui.home.DashboardViewModel
 
 @Composable
 fun AppRoot(authViewModel: AuthViewModel = viewModel()) {
@@ -22,7 +23,8 @@ fun AppRoot(authViewModel: AuthViewModel = viewModel()) {
     when (state) {
         is AuthState.Authenticated -> HomeScreen(
             email = email ?: (state as AuthState.Authenticated).email,
-            onSignOut = authViewModel::signOut
+            onSignOut = authViewModel::signOut,
+            viewModel = viewModel<DashboardViewModel>()
         )
         is AuthState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             CircularProgressIndicator()

@@ -21,7 +21,7 @@ object RetrofitClient {
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = if (BuildConfig.DEBUG)
-            HttpLoggingInterceptor.Level.BODY
+            HttpLoggingInterceptor.Level.BASIC
         else
             HttpLoggingInterceptor.Level.NONE
     }
@@ -40,7 +40,7 @@ object RetrofitClient {
         .build()
 
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl("${BuildConfig.SUPABASE_URL}/auth/v1/")
+        .baseUrl("${BuildConfig.SUPABASE_URL.trimEnd('/')}/auth/v1/")
         .client(okHttp)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()

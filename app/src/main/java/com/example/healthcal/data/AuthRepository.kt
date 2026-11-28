@@ -70,9 +70,14 @@ class AuthRepository(
      * If email confirmation is enabled on the project, the response
      * contains a user but **no access token** until the email is verified.
      */
-    suspend fun signUpWithEmail(email: String, password: String): AuthResult<AuthResponse> {
+    suspend fun signUpWithEmail(email: String, password: String, fullName: String = ""): AuthResult<AuthResponse> {
         return try {
-            val response = api.signUp(SignUpRequest(email, password), apiKey)
+            val metadata = if (fullName.isBlank()) emptyMap() else mapOf("full_name" to fullName.trim())
+            val response = api.signUp(
+                body = SignUpRequest(email, password, metadata),
+                apiKey = apiKey,
+                redirectTo = "healthcal://login-callback"
+            )
             if (response.isSuccessful) {
                 val body = response.body() ?: AuthResponse()
 
@@ -134,21 +139,24 @@ class AuthRepository(
      * deep-link with tokens in the URL fragment.
      */
     fun getGoogleSignInUrl(): String {
-        return "${BuildConfig.SUPABASE_URL}/auth/v1/authorize" +
+        val redirect = java.net.URLEncoder.encode("healthcal://login-callback", Charsets.UTF_8.name())
+        return "${BuildConfig.SUPABASE_URL.trimEnd('/')}/auth/v1/authorize" +
                 "?provider=google" +
-                "&redirect_to=healthcal://login-callback"
+                "&redirect_to=$redirect"
     }
 
     /**
-     * Called from [MainActivity] after the OAuth deep-link callback.
+     * Called from mainActivity after the OAuth deep-link callback.
      * Saves tokens and fetches user info.
      */
     suspend fun handleOAuthCallback(accessToken: String, refreshToken: String) {
         TokenManager.saveTokens(accessToken, refreshToken)
 
         when (val result = getCurrentUser(accessToken)) {
-            is AuthResult.Success -> SessionManager.setAuthenticated(result.data.email)
-            is AuthResult.Error   -> SessionManager.setAuthenticated()  // authenticated but email unknown
+            is AuthResult.Success -> {
+                SessionManager.setAuthenticated(result.data.email)
+            }
+            is AuthResult.Error -> SessionManager.setAuthenticated() // authenticated but email unknown
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.healthcal.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 // ══════════════════════════════════════════════════════════════
 //  Request bodies
@@ -10,7 +11,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SignUpRequest(
     val email: String,
-    val password: String
+    val password: String,
+    @SerialName("data") val userMetadata: Map<String, String> = emptyMap()
 )
 
 @Serializable
@@ -48,7 +50,8 @@ data class SupabaseUser(
     val email: String? = null,
     @SerialName("email_confirmed_at") val emailConfirmedAt: String? = null,
     @SerialName("created_at")         val createdAt: String? = null,
-    @SerialName("updated_at")         val updatedAt: String? = null
+    @SerialName("updated_at")         val updatedAt: String? = null,
+    @SerialName("user_metadata")      val userMetadata: JsonObject = JsonObject(emptyMap())
 )
 
 // ══════════════════════════════════════════════════════════════

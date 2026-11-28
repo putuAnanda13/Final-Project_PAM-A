@@ -1,8 +1,10 @@
 package com.example.healthcal
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
@@ -52,18 +54,19 @@ class MainActivity : ComponentActivity() {
         val fragment = uri.fragment
         if (fragment.isNullOrBlank()) {
             Log.w("MainActivity", "OAuth callback had no fragment")
+            Toast.makeText(this, "Login Google tidak mengembalikan sesi. Silakan coba lagi.", Toast.LENGTH_LONG).show()
             return
         }
 
-        val params = fragment.split("&").associate { part ->
-            val pieces = part.split("=", limit = 2)
-            pieces[0] to (pieces.getOrNull(1) ?: "")
-        }
+        val callback = Uri.parse("https://oauth-callback.invalid/?$fragment")
+        val params = callback.queryParameterNames.associateWith { callback.getQueryParameter(it).orEmpty() }
 
         // Check for OAuth error
         val error = params["error"]
         if (error != null) {
-            Log.e("MainActivity", "OAuth error: $error – ${params["error_description"]}")
+            val description = params["error_description"] ?: params["error_code"] ?: error
+            Log.e("MainActivity", "OAuth error: $description")
+            Toast.makeText(this, "Login Google gagal: $description", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -76,6 +79,7 @@ class MainActivity : ComponentActivity() {
             }
         } else {
             Log.w("MainActivity", "OAuth callback missing tokens")
+            Toast.makeText(this, "Login Google gagal: token tidak ditemukan.", Toast.LENGTH_LONG).show()
         }
     }
 }

@@ -61,10 +61,10 @@ class AuthViewModel(
 
     // ── Email / Password ────────────────────────────────────
 
-    fun signUpWithEmail(email: String, password: String) {
+    fun signUpWithEmail(email: String, password: String, fullName: String = "") {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
-            when (val result = repository.signUpWithEmail(email, password)) {
+            when (val result = repository.signUpWithEmail(email, password, fullName)) {
                 is AuthResult.Success -> {
                     if (result.data.accessToken == null) {
                         _uiState.update {
